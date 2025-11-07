@@ -560,6 +560,12 @@
 
             <div id="historyList"></div>
 
+            <div class="info-text" style="margin: 20px 0;">
+                <p>💾 Mots utilisés : <span id="usedWordsCount" style="font-weight: bold;">0</span></p>
+            </div>
+
+            <button id="btnClearUsedWords" class="warning">🗑️ Réinitialiser les mots utilisés</button>
+            <button id="btnClearHistory" class="danger">🗑️ Effacer l'historique</button>
             <button id="btnBackFromHistory" class="secondary">Retour</button>
         </div>
     </div>
@@ -1158,34 +1164,54 @@
             const list = document.getElementById('historyList');
             list.innerHTML = '';
 
+            // Update used words count
+            document.getElementById('usedWordsCount').textContent = gameState.usedWords.length;
+
             if (gameState.scoreHistory.length === 0) {
                 list.innerHTML = '<p class="info-text">Aucune partie terminée</p>';
-                return;
-            }
+            } else {
+                gameState.scoreHistory.forEach(game => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
 
-            gameState.scoreHistory.forEach(game => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                
-                const date = new Date(game.date);
-                const dateStr = date.toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    const date = new Date(game.date);
+                    const dateStr = date.toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    div.innerHTML = `
+                        <div class="history-date">${dateStr}</div>
+                        <div class="history-teams">🏆 Gagnant : ${game.winner.name} (${game.winner.score} pts)</div>
+                        <div style="font-size:0.9em;color:#666;margin-top:5px;">
+                            ${game.teams.length} équipes - ${game.themes.length} thèmes
+                        </div>
+                    `;
+                    list.appendChild(div);
                 });
-
-                div.innerHTML = `
-                    <div class="history-date">${dateStr}</div>
-                    <div class="history-teams">🏆 Gagnant : ${game.winner.name} (${game.winner.score} pts)</div>
-                    <div style="font-size:0.9em;color:#666;margin-top:5px;">
-                        ${game.teams.length} équipes - ${game.themes.length} thèmes
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+            }
         }
+
+        document.getElementById('btnClearUsedWords').addEventListener('click', () => {
+            if (confirm('Voulez-vous vraiment réinitialiser tous les mots utilisés ? Cela permettra de rejouer avec tous les mots.')) {
+                gameState.usedWords = [];
+                saveUsedWords();
+                renderHistory();
+                alert('✅ Mots utilisés réinitialisés ! Vous pouvez maintenant rejouer avec tous les mots.');
+            }
+        });
+
+        document.getElementById('btnClearHistory').addEventListener('click', () => {
+            if (confirm('Voulez-vous vraiment effacer tout l\'historique des parties ? Cette action est irréversible.')) {
+                gameState.scoreHistory = [];
+                saveHistory();
+                renderHistory();
+                alert('✅ Historique effacé !');
+            }
+        });
 
         document.getElementById('btnBackFromHistory').addEventListener('click', () => {
             showScreen('homeScreen');
