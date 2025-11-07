@@ -818,7 +818,7 @@
         window.removeTeam = removeTeam;
 
         document.getElementById('btnStartThemeSelect').addEventListener('click', () => {
-            showScreen('themeSelectScreen');
+            showScreen('teamThemeSelectScreen');
             renderThemeGrid();
         });
 
@@ -826,7 +826,7 @@
         // SÉLECTION DES THÈMES
         // ============================================
         function renderThemeGrid() {
-            const grid = document.getElementById('themeGrid');
+            const grid = document.getElementById('teamThemeGrid');
             grid.innerHTML = '';
 
             Object.entries(WORDS_DATA).forEach(([key, theme]) => {
@@ -858,14 +858,14 @@
         }
 
         function updateStartButton() {
-            const btn = document.getElementById('btnStartGame');
+            const btn = document.getElementById('btnNextTeamTheme');
             btn.style.display = gameState.selectedThemes.length > 0 ? 'block' : 'none';
             if (gameState.selectedThemes.length > 0) {
                 btn.textContent = `Commencer (${gameState.selectedThemes.length} thèmes)`;
             }
         }
 
-        document.getElementById('btnStartGame').addEventListener('click', () => {
+        document.getElementById('btnNextTeamTheme').addEventListener('click', () => {
             gameState.currentTeamIndex = 0;
             showScreen('prepScreen');
             document.getElementById('currentTeamName').textContent = gameState.teams[0].name;
