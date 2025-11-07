@@ -680,6 +680,21 @@
             const saved = localStorage.getItem('savedGame');
             if (saved) {
                 gameState = JSON.parse(saved);
+
+                // Migration: ensure all teams have a themes array
+                if (gameState.teams && gameState.teams.length > 0) {
+                    gameState.teams.forEach(team => {
+                        if (!team.themes) {
+                            team.themes = gameState.selectedThemes || [];
+                        }
+                    });
+                }
+
+                // Ensure currentThemeTeamIndex exists
+                if (gameState.currentThemeTeamIndex === undefined) {
+                    gameState.currentThemeTeamIndex = 0;
+                }
+
                 return true;
             }
             return false;
