@@ -818,7 +818,7 @@
         window.removeTeam = removeTeam;
 
         document.getElementById('btnStartThemeSelect').addEventListener('click', () => {
-            showScreen('themeSelectScreen');
+            showScreen('teamThemeSelectScreen');
             renderThemeGrid();
         });
 
@@ -826,7 +826,7 @@
         // SÉLECTION DES THÈMES
         // ============================================
         function renderThemeGrid() {
-            const grid = document.getElementById('themeGrid');
+            const grid = document.getElementById('teamThemeGrid');
             grid.innerHTML = '';
 
             Object.entries(WORDS_DATA).forEach(([key, theme]) => {
@@ -858,14 +858,14 @@
         }
 
         function updateStartButton() {
-            const btn = document.getElementById('btnStartGame');
+            const btn = document.getElementById('btnNextTeamTheme');
             btn.style.display = gameState.selectedThemes.length > 0 ? 'block' : 'none';
             if (gameState.selectedThemes.length > 0) {
                 btn.textContent = `Commencer (${gameState.selectedThemes.length} thèmes)`;
             }
         }
 
-        document.getElementById('btnStartGame').addEventListener('click', () => {
+        document.getElementById('btnNextTeamTheme').addEventListener('click', () => {
             gameState.currentTeamIndex = 0;
             showScreen('prepScreen');
             document.getElementById('currentTeamName').textContent = gameState.teams[0].name;
@@ -916,7 +916,7 @@
             // Afficher les scores
             const scoreBoard = document.getElementById('scoreBoard');
             scoreBoard.innerHTML = '';
-            
+
             gameState.teams.forEach((team, index) => {
                 const div = document.createElement('div');
                 div.className = 'team-item' + (index === gameState.currentTeamIndex ? ' active' : '');
@@ -925,6 +925,18 @@
                     <span class="team-score">${team.score} pts</span>
                 `;
                 scoreBoard.appendChild(div);
+            });
+
+            // Populate other team select dropdown
+            const otherTeamSelect = document.getElementById('otherTeamSelect');
+            otherTeamSelect.innerHTML = '<option value="">-- Sélectionner une équipe --</option>';
+            gameState.teams.forEach((team, index) => {
+                if (index !== gameState.currentTeamIndex) {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = team.name;
+                    otherTeamSelect.appendChild(option);
+                }
             });
         }
 
@@ -946,6 +958,20 @@
             saveGame();
             showScreen('scoreScreen');
             renderScoreScreen();
+        });
+
+        document.getElementById('btnOtherTeamFound').addEventListener('click', () => {
+            const otherTeamSelect = document.getElementById('otherTeamSelect');
+            const selectedTeamIndex = parseInt(otherTeamSelect.value);
+
+            if (!isNaN(selectedTeamIndex) && selectedTeamIndex >= 0) {
+                // Give point to the other team
+                gameState.teams[selectedTeamIndex].score += 1;
+                // Move to next turn
+                nextTurn();
+            } else {
+                alert('Veuillez sélectionner une équipe');
+            }
         });
 
         function applyPassPenalty() {
