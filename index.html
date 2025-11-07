@@ -2,6 +2,1123 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-... (content omitted for brevity)
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>Le Jeu De La Complicité</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: calc(100vh - 40px);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        button.secondary {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        button.success {
+            background: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        button.danger {
+            background: #dc3545;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .other-team-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border: 2px solid #17a2b8;
+        }
+
+        .other-team-section h4 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        button.info {
+            background: #17a2b8;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4);
+        }
+
+        .team-themes {
+            font-size: 0.85em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        button.warning {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .team-list {
+            margin: 20px 0;
+        }
+
+        .team-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .team-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .team-score {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .theme-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .theme-item.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .theme-emoji {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .theme-name {
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .theme-count {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .word-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .word-choices {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .word-choice-item {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid #e0e0e0;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .word-choice-item:active {
+            transform: translateY(-3px) scale(0.98);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .game-controls button {
+            margin: 0;
+        }
+
+        .score-board {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .intercept-team-list {
+            margin: 20px 0;
+        }
+
+        .intercept-team-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .intercept-team-item:active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 0.9em;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .prep-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #856404;
+        }
+
+        .winner-celebration {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .winner-trophy {
+            font-size: 5em;
+            margin: 20px 0;
+        }
+
+        .winner-name {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .history-date {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .history-teams {
+            font-weight: 600;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .word-display {
+                font-size: 2em;
+                padding: 30px 15px;
+            }
+
+            .word-choice-item {
+                font-size: 1.2em;
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
+<body>
+    <div class="container">
+        <!-- Écran d'accueil -->
+        <div id="homeScreen" class="screen active">
+            <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="100" cy="100" r="90" fill="url(#grad)" opacity="0.2"/>
+                <circle cx="70" cy="80" r="25" fill="url(#grad)"/>
+                <circle cx="130" cy="80" r="25" fill="url(#grad)"/>
+                <path d="M 60 120 Q 100 150 140 120" stroke="url(#grad)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            </svg>
+            <h1>Le Jeu De La Complicité</h1>
+            <p class="subtitle">Devinettes par équipes</p>
+            
+            <button id="btnNewGame">Nouvelle Partie</button>
+            <button id="btnContinue" class="success" style="display:none;">Continuer la partie</button>
+            <button id="btnHistory" class="secondary">Historique</button>
+            
+            <div class="info-text" style="margin-top: 30px;">
+                <p>🎯 Mode libre sans chronomètre</p>
+                <p>✅ +1 point si trouvé</p>
+                <p>⏭️ -0.5 point si passé</p>
+                <p>🎪 Interception possible</p>
+                <p>🎨 Thèmes par équipe</p>
+            </div>
+        </div>
+
+        <!-- Configuration des équipes -->
+        <div id="teamSetupScreen" class="screen">
+            <h2>Configuration des équipes</h2>
+            
+            <input type="text" id="teamNameInput" placeholder="Nom de l'équipe" maxlength="30">
+            <button id="btnAddTeam">Ajouter l'équipe</button>
+
+            <div class="team-list" id="teamList"></div>
+
+            <button id="btnStartThemeSelect" class="success" style="display:none;">
+                Continuer
+            </button>
+        </div>
+
+        <!-- Sélection des thèmes PAR ÉQUIPE -->
+        <div id="teamThemeSelectScreen" class="screen">
+            <h2>Sélection des thèmes</h2>
+            <div class="prep-info">
+                <h3 style="margin-bottom: 10px;">Équipe :</h3>
+                <div id="themeSelectTeamName" style="font-size: 1.3em; font-weight: bold; color: #667eea;"></div>
+            </div>
+            <p class="info-text">Choisissez au moins un thème pour cette équipe</p>
+
+            <div class="theme-grid" id="teamThemeGrid"></div>
+
+            <button id="btnNextTeamTheme" class="success" style="display:none;">
+                Continuer
+            </button>
+        </div>
+
+        <!-- Écran de préparation -->
+        <div id="prepScreen" class="screen">
+            <h2>Préparez-vous !</h2>
+            
+            <div class="prep-info">
+                <h3 style="margin-bottom: 10px;">Au tour de :</h3>
+                <div id="currentTeamName" style="font-size: 1.5em; font-weight: bold; color: #667eea;"></div>
+            </div>
+
+            <div class="info-text" style="margin: 30px 0;">
+                <p style="margin-bottom: 15px;">📱 Passez le téléphone à cette équipe</p>
+                <p style="margin-bottom: 15px;">👀 Les autres ne regardent pas !</p>
+                <p>🎯 Vous allez choisir parmi 3 mots</p>
+            </div>
+
+            <button id="btnReady" class="success">C'est parti ! 🎮</button>
+        </div>
+
+        <!-- Choix de mots -->
+        <div id="wordChoiceScreen" class="screen">
+            <h2>Choisissez votre mot</h2>
+            <p class="info-text">Sélectionnez le mot que vous voulez faire deviner</p>
+
+            <div class="word-choices" id="wordChoices"></div>
+        </div>
+
+        <!-- Écran de jeu -->
+        <div id="gameScreen" class="screen">
+            <div class="score-board">
+                <h3>Scores actuels</h3>
+                <div id="scoreBoard"></div>
+            </div>
+
+            <div class="word-display" id="wordDisplay"></div>
+
+            <!-- Section pour une autre équipe qui trouve -->
+            <div class="other-team-section">
+                <h4>🎪 Une autre équipe a trouvé ?</h4>
+                <select id="otherTeamSelect">
+                    <option value="">-- Sélectionner une équipe --</option>
+                </select>
+                <button id="btnOtherTeamFound" class="info" style="margin-top: 10px;">
+                    ✅ Cette équipe a trouvé
+                </button>
+            </div>
+
+            <div class="game-controls">
+                <button id="btnCorrect" class="success">✅ Mon équipe a trouvé</button>
+                <button id="btnPass" class="warning">⏭️ Passer</button>
+            </div>
+
+            <button id="btnPause" class="secondary">⏸️ Pause</button>
+        </div>
+
+        <!-- Écran des scores -->
+        <div id="scoreScreen" class="screen">
+            <h2>Scores actuels</h2>
+
+            <div class="team-list" id="scoreList"></div>
+
+            <button id="btnContinueGame" class="success">Continuer la partie</button>
+            <button id="btnEndGame" class="danger">Terminer la partie</button>
+        </div>
+
+        <!-- Écran du gagnant -->
+        <div id="winnerScreen" class="screen">
+            <div class="winner-celebration">
+                <div class="winner-trophy">🏆</div>
+                <h1>Victoire !</h1>
+                <div class="winner-name" id="winnerName"></div>
+                <p id="winnerScore" style="font-size: 1.5em; margin: 10px 0;"></p>
+            </div>
+
+            <h3 style="text-align: center; margin: 20px 0;">Classement final</h3>
+            <div class="team-list" id="finalScoreList"></div>
+
+            <button id="btnNewGameFromWinner">Nouvelle partie</button>
+            <button id="btnHomeFromWinner" class="secondary">Accueil</button>
+        </div>
+
+        <!-- Écran d'historique -->
+        <div id="historyScreen" class="screen">
+            <h2>Historique des parties</h2>
+
+            <div id="historyList"></div>
+
+            <button id="btnBackFromHistory" class="secondary">Retour</button>
+        </div>
+    </div>
+
+    <!-- Modal d'interception -->
+    <div id="interceptModal" class="modal">
+        <div class="modal-content">
+            <h2>Interception ! 🎪</h2>
+            <p class="info-text">Une autre équipe veut-elle tenter de deviner ce mot ?</p>
+            
+            <div class="intercept-team-list" id="interceptTeamList"></div>
+
+            <button id="btnNoIntercept" class="secondary">Pas d'interception</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // DONNÉES DES MOTS
+        // ============================================
+        const WORDS_DATA = {
+            cinema: {
+                emoji: "🎬",
+                name: "Cinéma & Séries",
+                words: ["Titanic", "Avatar", "Harry Potter", "Star Wars", "Le Seigneur des Anneaux", "Matrix", "Inception", "Jurassic Park", "Pirates des Caraïbes", "Batman", "Spider-Man", "Iron Man", "Avengers", "Game of Thrones", "Breaking Bad", "Friends", "Stranger Things", "The Walking Dead", "Prison Break", "Lost", "Gladiateur", "Forrest Gump", "Pulp Fiction", "Shrek", "Le Roi Lion", "La Reine des Neiges", "Toy Story", "Indiana Jones", "Rocky", "James Bond", "Terminator", "Retour vers le futur", "Star Trek", "Alien", "Predator", "Rambo", "Die Hard", "Mission Impossible", "Fast and Furious", "Transformers", "X-Men", "Deadpool", "Wonder Woman", "Superman", "Captain America", "Thor", "Hulk", "Black Panther", "Doctor Strange", "Guardians of the Galaxy", "Ant-Man", "Aquaman", "Flash", "Arrow", "Narcos", "The Crown", "Black Mirror", "Vikings", "Peaky Blinders", "Sherlock", "Westworld", "The Witcher", "The Mandalorian", "House of Cards", "Dexter", "True Detective", "Fargo", "Better Call Saul", "The Office", "How I Met Your Mother", "Big Bang Theory", "Brooklyn Nine-Nine", "Parks and Recreation", "Modern Family", "The Simpsons", "South Park", "Family Guy", "Rick and Morty", "BoJack Horseman", "Squid Game", "Money Heist", "Dark", "Lupin", "The Umbrella Academy", "Cobra Kai", "Bridgerton", "Emily in Paris", "The Queen's Gambit"]
+            },
+            celebrites: {
+                emoji: "⭐",
+                name: "Célébrités",
+                words: ["Beyoncé", "Rihanna", "Taylor Swift", "Lady Gaga", "Madonna", "Michael Jackson", "Elvis Presley", "The Beatles", "Queen", "David Bowie", "Prince", "Bob Marley", "Freddie Mercury", "Johnny Depp", "Leonardo DiCaprio", "Brad Pitt", "Angelina Jolie", "Tom Cruise", "Will Smith", "Dwayne Johnson", "Robert Downey Jr", "Scarlett Johansson", "Jennifer Lawrence", "Meryl Streep", "Denzel Washington", "Morgan Freeman", "Samuel L Jackson", "Harrison Ford", "Matt Damon", "George Clooney", "Julia Roberts", "Sandra Bullock", "Tom Hanks", "Nicole Kidman", "Charlize Theron", "Cristiano Ronaldo", "Lionel Messi", "Neymar", "Kylian Mbappé", "LeBron James", "Michael Jordan", "Serena Williams", "Roger Federer", "Rafael Nadal", "Usain Bolt", "Mike Tyson", "Muhammad Ali", "Floyd Mayweather", "Conor McGregor", "Lewis Hamilton", "Barack Obama", "Donald Trump", "Joe Biden", "Emmanuel Macron", "Angela Merkel", "Vladimir Putin", "Xi Jinping", "Oprah Winfrey", "Ellen DeGeneres", "Jimmy Fallon", "Elon Musk", "Bill Gates", "Mark Zuckerberg", "Jeff Bezos", "Steve Jobs", "Warren Buffett", "Kim Kardashian", "Kanye West", "Justin Bieber", "Ariana Grande"]
+            },
+            lieux: {
+                emoji: "🌍",
+                name: "Lieux",
+                words: ["Paris", "Londres", "New York", "Tokyo", "Rome", "Barcelone", "Dubai", "Sydney", "Rio de Janeiro", "Le Caire", "Moscou", "Pékin", "Los Angeles", "Las Vegas", "Miami", "San Francisco", "Chicago", "Toronto", "Vancouver", "Mexico", "Buenos Aires", "Lima", "Amsterdam", "Berlin", "Munich", "Vienne", "Prague", "Budapest", "Athènes", "Istanbul", "Jérusalem", "Tel Aviv", "Mumbai", "Bangkok", "Singapour", "Hong Kong", "Séoul", "Shanghai", "Melbourne", "Auckland", "Cap Town", "Marrakech", "Casablanca", "Tunis", "Alger", "Dakar", "Nairobi", "Lagos", "La Tour Eiffel", "Big Ben", "Statue de la Liberté", "Colisée", "Taj Mahal", "Grande Muraille", "Christ Rédempteur", "Machu Picchu", "Petra", "Pyramides", "Stonehenge", "Acropole", "Sagrada Familia", "Mont Saint-Michel", "Versailles"]
+            },
+            animaux: {
+                emoji: "🦁",
+                name: "Animaux",
+                words: ["Lion", "Tigre", "Éléphant", "Girafe", "Zèbre", "Rhinocéros", "Hippopotame", "Crocodile", "Gorille", "Chimpanzé", "Orang-outan", "Panda", "Koala", "Kangourou", "Ours", "Loup", "Renard", "Cerf", "Sanglier", "Aigle", "Faucon", "Hibou", "Perroquet", "Flamant rose", "Pingouin", "Manchot", "Dauphin", "Baleine", "Requin", "Pieuvre", "Méduse", "Tortue", "Serpent", "Cobra", "Python", "Boa", "Iguane", "Caméléon", "Grenouille", "Crapaud", "Salamandre", "Papillon", "Abeille", "Guêpe", "Fourmi", "Coccinelle", "Libellule", "Sauterelle", "Araignée", "Scorpion", "Crabe", "Homard", "Crevette", "Mouette", "Albatros", "Colibri", "Toucan", "Autruche", "Paon", "Cygne", "Canard", "Oie", "Poule", "Coq", "Dindon", "Cheval", "Âne", "Chameau", "Dromadaire", "Lama", "Alpaga", "Bison", "Buffle", "Vache", "Mouton", "Chèvre", "Cochon", "Lapin", "Écureuil", "Castor", "Rat", "Souris", "Hérisson"]
+            },
+            nourriture: {
+                emoji: "🍕",
+                name: "Nourriture",
+                words: ["Pizza", "Burger", "Hot-dog", "Tacos", "Sushi", "Ramen", "Pasta", "Lasagne", "Paella", "Couscous", "Tajine", "Curry", "Pad Thai", "Pho", "Dim Sum", "Fajitas", "Burrito", "Quesadilla", "Nachos", "Guacamole", "Hummus", "Falafel", "Kebab", "Shawarma", "Fish and Chips", "Fondue", "Raclette", "Tartiflette", "Cassoulet", "Pot-au-feu", "Blanquette", "Boeuf bourguignon", "Ratatouille", "Quiche", "Crêpe", "Croissant", "Pain au chocolat", "Macaron", "Éclair", "Tarte Tatin", "Crème brûlée", "Profiterole", "Tiramisu", "Panna cotta", "Cannoli", "Baklava", "Churros", "Flan", "Brownie", "Cheesecake", "Carrot cake", "Red velvet", "Cupcake", "Donut", "Muffin", "Cookie", "Pancake", "Waffle", "Toast", "Bagel", "Pretzel", "Popcorn", "Chips", "Frites", "Onion rings", "Nuggets", "Wings", "Ribs", "Steak", "Bacon", "Saucisse", "Merguez", "Chorizo"]
+            },
+            objets: {
+                emoji: "🔧",
+                name: "Objets",
+                words: ["Téléphone", "Ordinateur", "Tablette", "Montre", "Lunettes", "Clés", "Portefeuille", "Sac", "Valise", "Parapluie", "Chapeau", "Casquette", "Écharpe", "Gants", "Ceinture", "Cravate", "Chaussures", "Baskets", "Bottes", "Sandales", "Chaussettes", "Stylo", "Crayon", "Gomme", "Taille-crayon", "Règle", "Compas", "Calculatrice", "Livre", "Cahier", "Journal", "Magazine", "Carte", "Poster", "Photo", "Cadre", "Miroir", "Horloge", "Réveil", "Lampe", "Bougie", "Briquet", "Allumettes", "Ciseaux", "Colle", "Scotch", "Agrafeuse", "Perforeuse", "Trombones", "Élastiques", "Punaises", "Marteau", "Tournevis", "Clou", "Vis", "Pince", "Scie", "Perceuse", "Échelle", "Escabeau", "Balai", "Serpillière", "Aspirateur", "Fer à repasser", "Planche à repasser", "Machine à laver", "Sèche-linge", "Lave-vaisselle", "Four", "Micro-ondes", "Frigo", "Congélateur", "Cafetière", "Bouilloire", "Grille-pain", "Mixeur", "Blender", "Robot", "Casserole", "Poêle", "Marmite", "Cocotte"]
+            },
+            sports: {
+                emoji: "⚽",
+                name: "Sports",
+                words: ["Football", "Basketball", "Tennis", "Rugby", "Volleyball", "Handball", "Golf", "Baseball", "Cricket", "Hockey", "Boxe", "Karaté", "Judo", "Taekwondo", "Kung-fu", "Capoeira", "Lutte", "MMA", "Natation", "Plongeon", "Water-polo", "Surf", "Ski", "Snowboard", "Patinage", "Bobsleigh", "Luge", "Curling", "Cyclisme", "VTT", "BMX", "Athlétisme", "Sprint", "Marathon", "Saut en hauteur", "Saut en longueur", "Triple saut", "Perche", "Javelot", "Disque", "Marteau", "Poids", "Décathlon", "Heptathlon", "Gymnastique", "Trampoline", "Escalade", "Alpinisme", "Parachutisme", "Parapente", "Deltaplane", "Kitesurf", "Planche à voile", "Voile", "Aviron", "Canoë", "Kayak", "Rafting", "Plongée", "Apnée", "Escrime", "Tir à l'arc", "Équitation", "Polo", "Pétanque", "Bowling", "Billard", "Fléchettes", "Ping-pong", "Badminton", "Squash"]
+            },
+            art: {
+                emoji: "🎨",
+                name: "Art & Culture",
+                words: ["Peinture", "Sculpture", "Dessin", "Photographie", "Architecture", "Musique", "Danse", "Théâtre", "Cinéma", "Littérature", "Poésie", "Roman", "Nouvelle", "Essai", "BD", "Manga", "Comics", "Opéra", "Ballet", "Jazz", "Rock", "Pop", "Rap", "Hip-hop", "Reggae", "Blues", "Country", "Folk", "Classique", "Électro", "Techno", "House", "Dubstep", "Metal", "Punk", "Grunge", "Soul", "Funk", "Disco", "Salsa", "Tango", "Flamenco", "Valse", "Samba", "Rumba", "Cha-cha", "Bachata", "Merengue", "Zouk", "Mona Lisa", "La Joconde", "Guernica", "Le Cri", "La Nuit étoilée", "Les Tournesols", "La Création d'Adam", "David", "Venus de Milo", "Le Penseur", "Louvre", "Versailles", "Orsay", "Prado"]
+            },
+            metiers: {
+                emoji: "👨‍💼",
+                name: "Métiers",
+                words: ["Médecin", "Infirmier", "Chirurgien", "Dentiste", "Pharmacien", "Vétérinaire", "Avocat", "Juge", "Notaire", "Policier", "Gendarme", "Pompier", "Militaire", "Professeur", "Instituteur", "Directeur", "Ingénieur", "Architecte", "Designer", "Graphiste", "Photographe", "Vidéaste", "Journaliste", "Reporter", "Présentateur", "Acteur", "Chanteur", "Musicien", "Danseur", "Artiste", "Peintre", "Sculpteur", "Écrivain", "Poète", "Romancier", "Chef cuisinier", "Pâtissier", "Boulanger", "Boucher", "Poissonnier", "Fleuriste", "Coiffeur", "Esthéticien", "Mécanicien", "Électricien", "Plombier", "Maçon", "Menuisier", "Peintre en bâtiment", "Jardinier", "Agriculteur", "Éleveur", "Pêcheur", "Marin", "Pilote", "Hôtesse de l'air", "Chauffeur", "Livreur", "Facteur", "Banquier", "Comptable", "Assureur", "Agent immobilier", "Commercial", "Vendeur", "Caissier", "Serveur", "Barman"]
+            },
+            nature: {
+                emoji: "🌳",
+                name: "Nature",
+                words: ["Arbre", "Fleur", "Rose", "Tulipe", "Orchidée", "Tournesol", "Marguerite", "Lavande", "Jasmin", "Lilas", "Pivoine", "Iris", "Dahlia", "Hortensia", "Azalée", "Rhododendron", "Coquelicot", "Bleuet", "Pissenlit", "Muguet", "Violette", "Primevère", "Pâquerette", "Forêt", "Jungle", "Savane", "Désert", "Montagne", "Colline", "Vallée", "Plaine", "Prairie", "Champ", "Pré", "Mer", "Océan", "Lac", "Rivière", "Fleuve", "Ruisseau", "Cascade", "Chute d'eau", "Volcan", "Glacier", "Iceberg", "Île", "Péninsule", "Cap", "Baie", "Golf", "Détroit", "Falaise", "Grotte", "Caverne", "Canyon", "Gorge", "Ravin", "Dune", "Oasis", "Atoll", "Récif", "Lagon", "Marais", "Tourbière", "Mangrove", "Banquise", "Toundra", "Taïga", "Steppe", "Pampa", "Brousse", "Maquis", "Garrigue", "Lande", "Bocage", "Verger", "Vignoble", "Potager", "Jardin", "Parc", "Réserve"]
+            },
+            marques: {
+                emoji: "🏢",
+                name: "Marques",
+                words: ["Apple", "Samsung", "Google", "Microsoft", "Amazon", "Facebook", "Instagram", "Twitter", "TikTok", "Snapchat", "WhatsApp", "YouTube", "Netflix", "Spotify", "Disney", "Nike", "Adidas", "Puma", "Reebok", "Under Armour", "Coca-Cola", "Pepsi", "McDonald's", "KFC", "Burger King", "Starbucks", "Subway", "Pizza Hut", "Domino's", "Toyota", "Mercedes", "BMW", "Audi", "Volkswagen", "Ford", "Ferrari", "Lamborghini", "Porsche", "Tesla", "Renault", "Peugeot", "Citroën", "Chanel", "Dior", "Gucci", "Prada", "Louis Vuitton", "Hermès", "Rolex", "Cartier", "Tiffany", "Zara", "H&M", "Uniqlo", "Gap", "Levi's", "Lacoste", "Ralph Lauren", "Tommy Hilfiger", "Calvin Klein", "Sony", "LG", "Panasonic", "Canon", "Nikon", "GoPro", "PlayStation", "Xbox", "Nintendo", "IKEA", "LEGO", "Barbie", "Hot Wheels", "Nerf", "Hasbro", "Mattel", "L'Oréal", "Nivea", "Dove"]
+            },
+            emotions: {
+                emoji: "😊",
+                name: "Émotions",
+                words: ["Joie", "Bonheur", "Euphorie", "Extase", "Ravissement", "Allégresse", "Gaieté", "Enthousiasme", "Excitation", "Exaltation", "Tristesse", "Chagrin", "Peine", "Mélancolie", "Nostalgie", "Cafard", "Spleen", "Désespoir", "Détresse", "Affliction", "Colère", "Rage", "Fureur", "Irritation", "Agacement", "Exaspération", "Ressentiment", "Amertume", "Rancune", "Haine", "Peur", "Crainte", "Terreur", "Effroi", "Épouvante", "Angoisse", "Anxiété", "Inquiétude", "Appréhension", "Trac", "Amour", "Tendresse", "Affection", "Attachement", "Passion", "Désir", "Envie", "Convoitise", "Jalousie", "Surprise", "Étonnement", "Stupéfaction", "Ébahissement", "Émerveillement", "Admiration", "Respect", "Vénération", "Dégoût", "Répulsion", "Aversion", "Écœurement", "Honte", "Gêne", "Embarras", "Culpabilité", "Remords", "Regret"]
+            },
+            technologie: {
+                emoji: "📱",
+                name: "Technologie",
+                words: ["Smartphone", "Ordinateur", "Laptop", "Tablette", "Montre connectée", "Écouteurs", "Casque", "Enceinte", "Webcam", "Micro", "Clavier", "Souris", "Écran", "Imprimante", "Scanner", "Routeur", "Modem", "WiFi", "Bluetooth", "USB", "Disque dur", "SSD", "RAM", "Processeur", "Carte graphique", "Batterie", "Chargeur", "Câble", "Adaptateur", "Hub", "Internet", "Web", "Site", "Application", "Logiciel", "Programme", "Code", "Algorithme", "Base de données", "Serveur", "Cloud", "API", "HTML", "CSS", "JavaScript", "Python", "Java", "C++", "Ruby", "PHP", "SQL", "Intelligence artificielle", "Machine learning", "Deep learning", "Big data", "Blockchain", "Crypto", "Bitcoin", "NFT", "Réalité virtuelle", "VR", "Réalité augmentée"]
+            }
+        };
+
+        // ============================================
+        // ÉTAT DU JEU
+        // ============================================
+        let gameState = {
+            screen: 'home',
+            teams: [],
+            selectedThemes: [],
+            currentTeamIndex: 0,
+            currentWord: '',
+            wordChoices: [],
+            usedWords: [],
+            scoreHistory: []
+        };
+
+        // ============================================
+        // FONCTIONS UTILITAIRES
+        // ============================================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            gameState.screen = screenId;
+        }
+
+        function saveGame() {
+            localStorage.setItem('savedGame', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('savedGame');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                return true;
+            }
+            return false;
+        }
+
+        function loadUsedWords() {
+            const saved = localStorage.getItem('usedWords');
+            if (saved) {
+                gameState.usedWords = JSON.parse(saved);
+            }
+        }
+
+        function saveUsedWords() {
+            localStorage.setItem('usedWords', JSON.stringify(gameState.usedWords));
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('scoreHistory');
+            if (saved) {
+                gameState.scoreHistory = JSON.parse(saved);
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem('scoreHistory', JSON.stringify(gameState.scoreHistory));
+        }
+
+        function getAvailableWords() {
+            let allWords = [];
+            gameState.selectedThemes.forEach(themeKey => {
+                allWords = allWords.concat(WORDS_DATA[themeKey].words);
+            });
+            return allWords.filter(word => !gameState.usedWords.includes(word));
+        }
+
+        function getRandomWords(count = 3) {
+            const available = getAvailableWords();
+            if (available.length === 0) {
+                gameState.usedWords = [];
+                saveUsedWords();
+                return getRandomWords(count);
+            }
+            
+            const shuffled = available.sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, Math.min(count, available.length));
+        }
+
+        // ============================================
+        // ÉCRAN D'ACCUEIL
+        // ============================================
+        document.getElementById('btnNewGame').addEventListener('click', () => {
+            localStorage.removeItem('savedGame');
+            gameState = {
+                screen: 'teamSetup',
+                teams: [],
+                selectedThemes: [],
+                currentTeamIndex: 0,
+                currentWord: '',
+                wordChoices: [],
+                usedWords: gameState.usedWords || [],
+                scoreHistory: gameState.scoreHistory || []
+            };
+            showScreen('teamSetupScreen');
+        });
+
+        document.getElementById('btnContinue').addEventListener('click', () => {
+            if (loadGame()) {
+                showScreen(gameState.screen + 'Screen');
+                if (gameState.screen === 'prep') {
+                    document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
+                } else if (gameState.screen === 'wordChoice') {
+                    renderWordChoices();
+                } else if (gameState.screen === 'game') {
+                    renderGameScreen();
+                }
+            }
+        });
+
+        document.getElementById('btnHistory').addEventListener('click', () => {
+            showScreen('historyScreen');
+            renderHistory();
+        });
+
+        // ============================================
+        // CONFIGURATION DES ÉQUIPES
+        // ============================================
+        const teamNameInput = document.getElementById('teamNameInput');
+        const teamList = document.getElementById('teamList');
+        const btnStartThemeSelect = document.getElementById('btnStartThemeSelect');
+
+        document.getElementById('btnAddTeam').addEventListener('click', addTeam);
+        teamNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTeam();
+        });
+
+        function addTeam() {
+            const name = teamNameInput.value.trim();
+            if (name && gameState.teams.length < 10) {
+                gameState.teams.push({ name, score: 0 });
+                teamNameInput.value = '';
+                renderTeamList();
+            }
+        }
+
+        function removeTeam(index) {
+            gameState.teams.splice(index, 1);
+            renderTeamList();
+        }
+
+        function renderTeamList() {
+            teamList.innerHTML = '';
+            if (gameState.teams.length > 0) {
+                const title = document.createElement('h3');
+                title.textContent = `Équipes (${gameState.teams.length})`;
+                teamList.appendChild(title);
+
+                gameState.teams.forEach((team, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'team-item';
+                    div.innerHTML = `
+                        <span class="team-name">${team.name}</span>
+                        <button class="danger" style="width:auto;padding:8px 15px;margin:0;" onclick="removeTeam(${index})">
+                            Supprimer
+                        </button>
+                    `;
+                    teamList.appendChild(div);
+                });
+            }
+            
+            btnStartThemeSelect.style.display = gameState.teams.length >= 2 ? 'block' : 'none';
+            if (gameState.teams.length >= 2) {
+                btnStartThemeSelect.textContent = `Continuer (${gameState.teams.length} équipes)`;
+            }
+        }
+
+        // Rendre removeTeam globale pour onclick
+        window.removeTeam = removeTeam;
+
+        document.getElementById('btnStartThemeSelect').addEventListener('click', () => {
+            showScreen('themeSelectScreen');
+            renderThemeGrid();
+        });
+
+        // ============================================
+        // SÉLECTION DES THÈMES
+        // ============================================
+        function renderThemeGrid() {
+            const grid = document.getElementById('themeGrid');
+            grid.innerHTML = '';
+
+            Object.entries(WORDS_DATA).forEach(([key, theme]) => {
+                const div = document.createElement('div');
+                div.className = 'theme-item';
+                if (gameState.selectedThemes.includes(key)) {
+                    div.classList.add('selected');
+                }
+                div.innerHTML = `
+                    <div class="theme-emoji">${theme.emoji}</div>
+                    <div class="theme-name">${theme.name}</div>
+                    <div class="theme-count">${theme.words.length} mots</div>
+                `;
+                div.addEventListener('click', () => toggleTheme(key));
+                grid.appendChild(div);
+            });
+
+            updateStartButton();
+        }
+
+        function toggleTheme(themeKey) {
+            const index = gameState.selectedThemes.indexOf(themeKey);
+            if (index > -1) {
+                gameState.selectedThemes.splice(index, 1);
+            } else {
+                gameState.selectedThemes.push(themeKey);
+            }
+            renderThemeGrid();
+        }
+
+        function updateStartButton() {
+            const btn = document.getElementById('btnStartGame');
+            btn.style.display = gameState.selectedThemes.length > 0 ? 'block' : 'none';
+            if (gameState.selectedThemes.length > 0) {
+                btn.textContent = `Commencer (${gameState.selectedThemes.length} thèmes)`;
+            }
+        }
+
+        document.getElementById('btnStartGame').addEventListener('click', () => {
+            gameState.currentTeamIndex = 0;
+            showScreen('prepScreen');
+            document.getElementById('currentTeamName').textContent = gameState.teams[0].name;
+            saveGame();
+        });
+
+        // ============================================
+        // PRÉPARATION
+        // ============================================
+        document.getElementById('btnReady').addEventListener('click', () => {
+            gameState.wordChoices = getRandomWords(3);
+            showScreen('wordChoiceScreen');
+            renderWordChoices();
+        });
+
+        // ============================================
+        // CHOIX DE MOTS
+        // ============================================
+        function renderWordChoices() {
+            const container = document.getElementById('wordChoices');
+            container.innerHTML = '';
+
+            gameState.wordChoices.forEach(word => {
+                const div = document.createElement('div');
+                div.className = 'word-choice-item';
+                div.textContent = word;
+                div.addEventListener('click', () => selectWord(word));
+                container.appendChild(div);
+            });
+        }
+
+        function selectWord(word) {
+            gameState.currentWord = word;
+            gameState.usedWords.push(word);
+            saveUsedWords();
+            showScreen('gameScreen');
+            renderGameScreen();
+            saveGame();
+        }
+
+        // ============================================
+        // ÉCRAN DE JEU
+        // ============================================
+        function renderGameScreen() {
+            // Afficher le mot
+            document.getElementById('wordDisplay').textContent = gameState.currentWord;
+
+            // Afficher les scores
+            const scoreBoard = document.getElementById('scoreBoard');
+            scoreBoard.innerHTML = '';
+            
+            gameState.teams.forEach((team, index) => {
+                const div = document.createElement('div');
+                div.className = 'team-item' + (index === gameState.currentTeamIndex ? ' active' : '');
+                div.innerHTML = `
+                    <span class="team-name">${team.name}</span>
+                    <span class="team-score">${team.score} pts</span>
+                `;
+                scoreBoard.appendChild(div);
+            });
+        }
+
+        document.getElementById('btnCorrect').addEventListener('click', () => {
+            gameState.teams[gameState.currentTeamIndex].score += 1;
+            nextTurn();
+        });
+
+        document.getElementById('btnPass').addEventListener('click', () => {
+            if (gameState.teams.length >= 3) {
+                showInterceptModal();
+            } else {
+                applyPassPenalty();
+                nextTurn();
+            }
+        });
+
+        document.getElementById('btnPause').addEventListener('click', () => {
+            saveGame();
+            showScreen('scoreScreen');
+            renderScoreScreen();
+        });
+
+        function applyPassPenalty() {
+            gameState.teams[gameState.currentTeamIndex].score -= 0.5;
+        }
+
+        function nextTurn() {
+            gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            showScreen('prepScreen');
+            document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
+            saveGame();
+        }
+
+        // ============================================
+        // MODAL D'INTERCEPTION
+        // ============================================
+        function showInterceptModal() {
+            const modal = document.getElementById('interceptModal');
+            const list = document.getElementById('interceptTeamList');
+            
+            list.innerHTML = '';
+            gameState.teams.forEach((team, index) => {
+                if (index !== gameState.currentTeamIndex) {
+                    const div = document.createElement('div');
+                    div.className = 'intercept-team-item';
+                    div.textContent = team.name;
+                    div.addEventListener('click', () => handleIntercept(index));
+                    list.appendChild(div);
+                }
+            });
+
+            modal.classList.add('active');
+        }
+
+        function hideInterceptModal() {
+            document.getElementById('interceptModal').classList.remove('active');
+        }
+
+        function handleIntercept(teamIndex) {
+            applyPassPenalty();
+            gameState.currentTeamIndex = teamIndex;
+            hideInterceptModal();
+            renderGameScreen();
+        }
+
+        document.getElementById('btnNoIntercept').addEventListener('click', () => {
+            hideInterceptModal();
+            applyPassPenalty();
+            nextTurn();
+        });
+
+        // ============================================
+        // ÉCRAN DES SCORES
+        // ============================================
+        function renderScoreScreen() {
+            const list = document.getElementById('scoreList');
+            list.innerHTML = '';
+
+            const sortedTeams = [...gameState.teams].sort((a, b) => b.score - a.score);
+            sortedTeams.forEach((team, index) => {
+                const div = document.createElement('div');
+                div.className = 'team-item';
+                const medal = index === 0 ? '🥇 ' : index === 1 ? '🥈 ' : index === 2 ? '🥉 ' : '';
+                div.innerHTML = `
+                    <span class="team-name">${medal}${team.name}</span>
+                    <span class="team-score">${team.score} pts</span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('btnContinueGame').addEventListener('click', () => {
+            showScreen('prepScreen');
+            document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
+        });
+
+        document.getElementById('btnEndGame').addEventListener('click', () => {
+            const winner = [...gameState.teams].sort((a, b) => b.score - a.score)[0];
+            
+            gameState.scoreHistory.unshift({
+                date: new Date().toISOString(),
+                winner,
+                teams: gameState.teams,
+                themes: gameState.selectedThemes
+            });
+            gameState.scoreHistory = gameState.scoreHistory.slice(0, 10);
+            saveHistory();
+
+            showScreen('winnerScreen');
+            renderWinnerScreen(winner);
+            localStorage.removeItem('savedGame');
+        });
+
+        // ============================================
+        // ÉCRAN DU GAGNANT
+        // ============================================
+        function renderWinnerScreen(winner) {
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerScore').textContent = `${winner.score} points`;
+
+            const list = document.getElementById('finalScoreList');
+            list.innerHTML = '';
+
+            const sortedTeams = [...gameState.teams].sort((a, b) => b.score - a.score);
+            sortedTeams.forEach((team, index) => {
+                const div = document.createElement('div');
+                div.className = 'team-item';
+                const medal = index === 0 ? '🥇 ' : index === 1 ? '🥈 ' : index === 2 ? '🥉 ' : '';
+                div.innerHTML = `
+                    <span class="team-name">${medal}${team.name}</span>
+                    <span class="team-score">${team.score} pts</span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('btnNewGameFromWinner').addEventListener('click', () => {
+            document.getElementById('btnNewGame').click();
+        });
+
+        document.getElementById('btnHomeFromWinner').addEventListener('click', () => {
+            showScreen('homeScreen');
+        });
+
+        // ============================================
+        // HISTORIQUE
+        // ============================================
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+
+            if (gameState.scoreHistory.length === 0) {
+                list.innerHTML = '<p class="info-text">Aucune partie terminée</p>';
+                return;
+            }
+
+            gameState.scoreHistory.forEach(game => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                
+                const date = new Date(game.date);
+                const dateStr = date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                div.innerHTML = `
+                    <div class="history-date">${dateStr}</div>
+                    <div class="history-teams">🏆 Gagnant : ${game.winner.name} (${game.winner.score} pts)</div>
+                    <div style="font-size:0.9em;color:#666;margin-top:5px;">
+                        ${game.teams.length} équipes - ${game.themes.length} thèmes
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('btnBackFromHistory').addEventListener('click', () => {
+            showScreen('homeScreen');
+        });
+
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        loadUsedWords();
+        loadHistory();
+
+        if (localStorage.getItem('savedGame')) {
+            document.getElementById('btnContinue').style.display = 'block';
+        }
+    </script>
+</body>
 </html>
