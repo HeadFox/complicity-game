@@ -458,19 +458,15 @@
             </button>
         </div>
 
-        <!-- Sélection des thèmes PAR ÉQUIPE -->
-        <div id="teamThemeSelectScreen" class="screen">
+        <!-- Sélection des thèmes -->
+        <div id="themeSelectScreen" class="screen">
             <h2>Sélection des thèmes</h2>
-            <div class="prep-info">
-                <h3 style="margin-bottom: 10px;">Équipe :</h3>
-                <div id="themeSelectTeamName" style="font-size: 1.3em; font-weight: bold; color: #667eea;"></div>
-            </div>
-            <p class="info-text">Choisissez au moins un thème pour cette équipe</p>
+            <p class="info-text">Choisissez au moins un thème pour le jeu</p>
 
-            <div class="theme-grid" id="teamThemeGrid"></div>
+            <div class="theme-grid" id="themeGrid"></div>
 
-            <button id="btnNextTeamTheme" class="success" style="display:none;">
-                Continuer
+            <button id="btnStartGame" class="success" style="display:none;">
+                Commencer le jeu
             </button>
         </div>
 
@@ -486,18 +482,11 @@
             <div class="info-text" style="margin: 30px 0;">
                 <p style="margin-bottom: 15px;">📱 Passez le téléphone à cette équipe</p>
                 <p style="margin-bottom: 15px;">👀 Les autres ne regardent pas !</p>
-                <p>🎯 Vous allez choisir parmi 3 mots</p>
+                <p>🎯 Faites deviner le mot qui va apparaître</p>
+                <p style="margin-top: 15px;">🎫 Jokers disponibles : 3 par équipe</p>
             </div>
 
             <button id="btnReady" class="success">C'est parti ! 🎮</button>
-        </div>
-
-        <!-- Choix de mots -->
-        <div id="wordChoiceScreen" class="screen">
-            <h2>Choisissez votre mot</h2>
-            <p class="info-text">Sélectionnez le mot que vous voulez faire deviner</p>
-
-            <div class="word-choices" id="wordChoices"></div>
         </div>
 
         <!-- Écran de jeu -->
@@ -522,7 +511,7 @@
 
             <div class="game-controls">
                 <button id="btnCorrect" class="success">✅ Mon équipe a trouvé</button>
-                <button id="btnPass" class="warning">⏭️ Passer</button>
+                <button id="btnPass" class="warning"><span id="passButtonText">⏭️ Passer</span></button>
             </div>
 
             <button id="btnPause" class="secondary">⏸️ Pause</button>
@@ -662,9 +651,7 @@
             teams: [],
             selectedThemes: [],
             currentTeamIndex: 0,
-            currentThemeTeamIndex: 0,
             currentWord: '',
-            wordChoices: [],
             usedWords: [],
             scoreHistory: []
         };
@@ -687,18 +674,17 @@
             if (saved) {
                 gameState = JSON.parse(saved);
 
-                // Migration: ensure all teams have a themes array
+                // Migration: ensure all teams have jokers
                 if (gameState.teams && gameState.teams.length > 0) {
                     gameState.teams.forEach(team => {
-                        if (!team.themes) {
-                            team.themes = gameState.selectedThemes || [];
+                        if (team.jokers === undefined) {
+                            team.jokers = 3;
+                        }
+                        // Remove old themes property if it exists
+                        if (team.themes) {
+                            delete team.themes;
                         }
                     });
-                }
-
-                // Ensure currentThemeTeamIndex exists
-                if (gameState.currentThemeTeamIndex === undefined) {
-                    gameState.currentThemeTeamIndex = 0;
                 }
 
                 return true;
@@ -730,13 +716,9 @@
 
         function getAvailableWords() {
             let allWords = [];
-            // Get words from the current team's selected themes
-            const currentTeam = gameState.teams[gameState.currentTeamIndex];
-            if (currentTeam && currentTeam.themes) {
-                currentTeam.themes.forEach(themeKey => {
-                    allWords = allWords.concat(WORDS_DATA[themeKey].words);
-                });
-            }
+            gameState.selectedThemes.forEach(themeKey => {
+                allWords = allWords.concat(WORDS_DATA[themeKey].words);
+            });
             return allWords.filter(word => !gameState.usedWords.includes(word));
         }
 
@@ -747,9 +729,21 @@
                 saveUsedWords();
                 return getRandomWords(count);
             }
-            
+
             const shuffled = available.sort(() => Math.random() - 0.5);
             return shuffled.slice(0, Math.min(count, available.length));
+        }
+
+        function getRandomWord() {
+            const available = getAvailableWords();
+            if (available.length === 0) {
+                gameState.usedWords = [];
+                saveUsedWords();
+                return getRandomWord();
+            }
+
+            const randomIndex = Math.floor(Math.random() * available.length);
+            return available[randomIndex];
         }
 
         // ============================================
@@ -762,9 +756,7 @@
                 teams: [],
                 selectedThemes: [],
                 currentTeamIndex: 0,
-                currentThemeTeamIndex: 0,
                 currentWord: '',
-                wordChoices: [],
                 usedWords: gameState.usedWords || [],
                 scoreHistory: gameState.scoreHistory || []
             };
@@ -773,11 +765,14 @@
 
         document.getElementById('btnContinue').addEventListener('click', () => {
             if (loadGame()) {
+                // Migration: if old save was on wordChoice screen, send to prep instead
+                if (gameState.screen === 'wordChoice') {
+                    gameState.screen = 'prep';
+                }
+
                 showScreen(gameState.screen + 'Screen');
                 if (gameState.screen === 'prep') {
                     document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
-                } else if (gameState.screen === 'wordChoice') {
-                    renderWordChoices();
                 } else if (gameState.screen === 'game') {
                     renderGameScreen();
                 }
@@ -804,7 +799,7 @@
         function addTeam() {
             const name = teamNameInput.value.trim();
             if (name && gameState.teams.length < 10) {
-                gameState.teams.push({ name, score: 0, themes: [] });
+                gameState.teams.push({ name, score: 0, jokers: 3 });
                 teamNameInput.value = '';
                 renderTeamList();
             }
@@ -845,8 +840,7 @@
         window.removeTeam = removeTeam;
 
         document.getElementById('btnStartThemeSelect').addEventListener('click', () => {
-            gameState.currentThemeTeamIndex = 0;
-            showScreen('teamThemeSelectScreen');
+            showScreen('themeSelectScreen');
             renderThemeGrid();
         });
 
@@ -854,17 +848,13 @@
         // SÉLECTION DES THÈMES
         // ============================================
         function renderThemeGrid() {
-            const grid = document.getElementById('teamThemeGrid');
+            const grid = document.getElementById('themeGrid');
             grid.innerHTML = '';
-
-            // Display current team name
-            const currentTeam = gameState.teams[gameState.currentThemeTeamIndex];
-            document.getElementById('themeSelectTeamName').textContent = currentTeam.name;
 
             Object.entries(WORDS_DATA).forEach(([key, theme]) => {
                 const div = document.createElement('div');
                 div.className = 'theme-item';
-                if (currentTeam.themes.includes(key)) {
+                if (gameState.selectedThemes.includes(key)) {
                     div.classList.add('selected');
                 }
                 div.innerHTML = `
@@ -880,92 +870,42 @@
         }
 
         function toggleTheme(themeKey) {
-            const currentTeam = gameState.teams[gameState.currentThemeTeamIndex];
-            const index = currentTeam.themes.indexOf(themeKey);
+            const index = gameState.selectedThemes.indexOf(themeKey);
             if (index > -1) {
-                currentTeam.themes.splice(index, 1);
+                gameState.selectedThemes.splice(index, 1);
             } else {
-                currentTeam.themes.push(themeKey);
+                gameState.selectedThemes.push(themeKey);
             }
             renderThemeGrid();
         }
 
         function updateStartButton() {
-            const btn = document.getElementById('btnNextTeamTheme');
-            const currentTeam = gameState.teams[gameState.currentThemeTeamIndex];
-            btn.style.display = currentTeam.themes.length > 0 ? 'block' : 'none';
-
-            // Check if this is the last team
-            const isLastTeam = gameState.currentThemeTeamIndex === gameState.teams.length - 1;
-
-            if (currentTeam.themes.length > 0) {
-                if (isLastTeam) {
-                    btn.textContent = `Commencer le jeu (${currentTeam.themes.length} thèmes)`;
-                } else {
-                    btn.textContent = `Équipe suivante (${currentTeam.themes.length} thèmes)`;
-                }
+            const btn = document.getElementById('btnStartGame');
+            btn.style.display = gameState.selectedThemes.length > 0 ? 'block' : 'none';
+            if (gameState.selectedThemes.length > 0) {
+                btn.textContent = `Commencer le jeu (${gameState.selectedThemes.length} thèmes)`;
             }
         }
 
-        document.getElementById('btnNextTeamTheme').addEventListener('click', () => {
-            // Check if there are more teams to select themes for
-            if (gameState.currentThemeTeamIndex < gameState.teams.length - 1) {
-                // Move to next team
-                gameState.currentThemeTeamIndex++;
-                renderThemeGrid();
-            } else {
-                // All teams have selected themes, start the game
-                gameState.currentTeamIndex = 0;
-
-                // Build global selectedThemes from all teams
-                gameState.selectedThemes = [];
-                gameState.teams.forEach(team => {
-                    team.themes.forEach(theme => {
-                        if (!gameState.selectedThemes.includes(theme)) {
-                            gameState.selectedThemes.push(theme);
-                        }
-                    });
-                });
-
-                showScreen('prepScreen');
-                document.getElementById('currentTeamName').textContent = gameState.teams[0].name;
-                saveGame();
-            }
+        document.getElementById('btnStartGame').addEventListener('click', () => {
+            gameState.currentTeamIndex = 0;
+            showScreen('prepScreen');
+            document.getElementById('currentTeamName').textContent = gameState.teams[0].name;
+            saveGame();
         });
 
         // ============================================
         // PRÉPARATION
         // ============================================
         document.getElementById('btnReady').addEventListener('click', () => {
-            gameState.wordChoices = getRandomWords(3);
-            showScreen('wordChoiceScreen');
-            renderWordChoices();
-        });
-
-        // ============================================
-        // CHOIX DE MOTS
-        // ============================================
-        function renderWordChoices() {
-            const container = document.getElementById('wordChoices');
-            container.innerHTML = '';
-
-            gameState.wordChoices.forEach(word => {
-                const div = document.createElement('div');
-                div.className = 'word-choice-item';
-                div.textContent = word;
-                div.addEventListener('click', () => selectWord(word));
-                container.appendChild(div);
-            });
-        }
-
-        function selectWord(word) {
+            const word = getRandomWord();
             gameState.currentWord = word;
             gameState.usedWords.push(word);
             saveUsedWords();
             showScreen('gameScreen');
             renderGameScreen();
             saveGame();
-        }
+        });
 
         // ============================================
         // ÉCRAN DE JEU
@@ -981,12 +921,22 @@
             gameState.teams.forEach((team, index) => {
                 const div = document.createElement('div');
                 div.className = 'team-item' + (index === gameState.currentTeamIndex ? ' active' : '');
+                const jokerText = team.jokers > 0 ? ` | 🎫 ${team.jokers}` : ' | 🎫 0';
                 div.innerHTML = `
                     <span class="team-name">${team.name}</span>
-                    <span class="team-score">${team.score} pts</span>
+                    <span class="team-score">${team.score} pts${jokerText}</span>
                 `;
                 scoreBoard.appendChild(div);
             });
+
+            // Update pass button text
+            const currentTeam = gameState.teams[gameState.currentTeamIndex];
+            const passButtonText = document.getElementById('passButtonText');
+            if (currentTeam.jokers > 0) {
+                passButtonText.textContent = `⏭️ Passer (🎫 ${currentTeam.jokers})`;
+            } else {
+                passButtonText.textContent = `⏭️ Passer (-0.5 pt)`;
+            }
 
             // Populate other team select dropdown
             const otherTeamSelect = document.getElementById('otherTeamSelect');
@@ -1007,11 +957,27 @@
         });
 
         document.getElementById('btnPass').addEventListener('click', () => {
-            if (gameState.teams.length >= 3) {
-                showInterceptModal();
+            const currentTeam = gameState.teams[gameState.currentTeamIndex];
+
+            if (currentTeam.jokers > 0) {
+                // Use a joker
+                currentTeam.jokers -= 1;
+                wasJokerUsedForPass = true;
+                saveGame();
+                if (gameState.teams.length >= 3) {
+                    showInterceptModal();
+                } else {
+                    nextTurn();
+                }
             } else {
-                applyPassPenalty();
-                nextTurn();
+                // No jokers left, apply penalty
+                wasJokerUsedForPass = false;
+                if (gameState.teams.length >= 3) {
+                    showInterceptModal();
+                } else {
+                    applyPassPenalty();
+                    nextTurn();
+                }
             }
         });
 
@@ -1072,15 +1038,24 @@
         }
 
         function handleIntercept(teamIndex) {
-            applyPassPenalty();
+            const currentTeam = gameState.teams[gameState.currentTeamIndex];
+            // Apply penalty only if no jokers were used
+            if (currentTeam.jokers === 0 || !wasJokerUsedForPass) {
+                applyPassPenalty();
+            }
             gameState.currentTeamIndex = teamIndex;
             hideInterceptModal();
             renderGameScreen();
         }
 
+        let wasJokerUsedForPass = false;
+
         document.getElementById('btnNoIntercept').addEventListener('click', () => {
             hideInterceptModal();
-            applyPassPenalty();
+            // Apply penalty only if no joker was used
+            if (!wasJokerUsedForPass) {
+                applyPassPenalty();
+            }
             nextTurn();
         });
 
