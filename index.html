@@ -769,12 +769,18 @@
                 if (gameState.screen === 'wordChoice') {
                     gameState.screen = 'prep';
                 }
+                // Migration: if old save was on teamThemeSelect, send to themeSelect
+                if (gameState.screen === 'teamThemeSelect') {
+                    gameState.screen = 'themeSelect';
+                }
 
                 showScreen(gameState.screen + 'Screen');
                 if (gameState.screen === 'prep') {
                     document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
                 } else if (gameState.screen === 'game') {
                     renderGameScreen();
+                } else if (gameState.screen === 'themeSelect') {
+                    renderThemeGrid();
                 }
             }
         });
@@ -1007,8 +1013,8 @@
 
         function nextTurn() {
             gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
-            showScreen('prepScreen');
-            document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
+            // Go directly to game screen with the same word, skip prep screen
+            renderGameScreen();
             saveGame();
         }
 
