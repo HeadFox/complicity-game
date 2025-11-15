@@ -966,25 +966,20 @@
             const currentTeam = gameState.teams[gameState.currentTeamIndex];
 
             if (currentTeam.jokers > 0) {
-                // Use a joker
+                // Use a joker - show new word to same team
                 currentTeam.jokers -= 1;
-                wasJokerUsedForPass = true;
-                saveGame();
-                if (gameState.teams.length >= 3) {
-                    showInterceptModal();
-                } else {
-                    nextTurn();
-                }
             } else {
                 // No jokers left, apply penalty
-                wasJokerUsedForPass = false;
-                if (gameState.teams.length >= 3) {
-                    showInterceptModal();
-                } else {
-                    applyPassPenalty();
-                    nextTurn();
-                }
+                applyPassPenalty();
             }
+
+            // Generate a new word for the current team (same team, new word)
+            const word = getRandomWord();
+            gameState.currentWord = word;
+            gameState.usedWords.push(word);
+            saveUsedWords();
+            renderGameScreen();
+            saveGame();
         });
 
         document.getElementById('btnPause').addEventListener('click', () => {
@@ -1013,8 +1008,9 @@
 
         function nextTurn() {
             gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
-            // Go directly to game screen with the same word, skip prep screen
-            renderGameScreen();
+            // Go to prep screen for next team
+            showScreen('prepScreen');
+            document.getElementById('currentTeamName').textContent = gameState.teams[gameState.currentTeamIndex].name;
             saveGame();
         }
 
@@ -1044,24 +1040,14 @@
         }
 
         function handleIntercept(teamIndex) {
-            const currentTeam = gameState.teams[gameState.currentTeamIndex];
-            // Apply penalty only if no jokers were used
-            if (currentTeam.jokers === 0 || !wasJokerUsedForPass) {
-                applyPassPenalty();
-            }
             gameState.currentTeamIndex = teamIndex;
             hideInterceptModal();
+            // Show the same word to the intercepting team
             renderGameScreen();
         }
 
-        let wasJokerUsedForPass = false;
-
         document.getElementById('btnNoIntercept').addEventListener('click', () => {
             hideInterceptModal();
-            // Apply penalty only if no joker was used
-            if (!wasJokerUsedForPass) {
-                applyPassPenalty();
-            }
             nextTurn();
         });
 
